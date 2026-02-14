@@ -13,6 +13,13 @@ pandas_data = pandas.read_csv("birthdays.csv")
 
 birthdays_dict = {(row.month, row.day): row for (index, row) in pandas_data.iterrows()}
 
+
+def write_error(message):
+    """Will write  message to error file"""
+    with open("./log/error.txt", 'a') as error_file:
+        error_file.write(f"{message}\n")
+
+
 # Try except block for both letter and smtp connection
 # If the letter template is missing it will write to the error log and exit
 # If there is an authentication error when trying to connect to SMTP
@@ -25,8 +32,7 @@ if today_tuple in birthdays_dict:
             letter = letter.read()
             letter = letter.replace("[NAME]", birthday_person_name)
     except FileNotFoundError:
-        with open("./log/error.txt", 'a') as error_file:
-            error_file.write("Letter template file not found\n")
+        write_error("Letter template not found.\n")
         exit()
 
     try:
@@ -39,5 +45,4 @@ if today_tuple in birthdays_dict:
                 msg=f"Subject: Happy Birthday\n\n {letter}"
             )
     except smtplib.SMTPAuthenticationError:
-        with open("./log/error.txt", 'a') as error_file:
-            error_file.write("Authentication Error Check Username and Password\n")
+        write_error("Authentication Error Check Username and Password\n")
